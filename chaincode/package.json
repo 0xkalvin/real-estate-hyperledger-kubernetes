@@ -1,7 +1,7 @@
 {
-  "name": "chaincode",
+  "name": "realestate",
   "version": "0.0.1",
-  "description": "My Smart Contract",
+  "description": "Real estate smart contract",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "engines": {
@@ -23,6 +23,7 @@
   "dependencies": {
     "fabric-contract-api": "^1.4.5",
     "fabric-shim": "^1.4.5",
+    "log4js": "^6.3.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
