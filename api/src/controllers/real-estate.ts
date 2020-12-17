@@ -27,4 +27,17 @@ export default {
             return next(error)
         }
     },
+
+    async transfer(request: Request, response: Response, next: NextFunction){
+        try {
+            const realEstateId = request.params.id
+            const offerId = request.body.offerId as string
+
+            const realEstate = await service.transferOwnership(realEstateId, offerId)
+            
+            return response.status(200).json(realEstate)
+        } catch (error) {
+            return next(error)
+        }
+    },
 }

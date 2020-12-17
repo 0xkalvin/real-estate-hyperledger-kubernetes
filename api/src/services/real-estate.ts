@@ -60,4 +60,36 @@ export default {
       throw error;
     }
   },
+
+  async transferOwnership(realEstateId: string, offerId: string) {
+    try {
+      logger.info({
+        message: "Starting to transfer real estate ownership...",
+      });
+
+      const contract = await hyperledgerFabric.getContract();
+
+      const realEstateAsBuffer = await contract.submitTransaction(
+        "transferRealEstateOwnership",
+        realEstateId,
+        offerId
+      );
+
+      const realEstate = JSON.parse(realEstateAsBuffer.toString());
+
+      logger.info({
+        message: "Successfully transfered real estate ownership",
+      });
+
+      return realEstate;
+    } catch (error) {
+      logger.error({
+        message: "Failed to transfer real estate on blockchain",
+        error_message: error.message,
+        error_stack: error.stack,
+      });
+
+      throw error;
+    }
+  },
 };
