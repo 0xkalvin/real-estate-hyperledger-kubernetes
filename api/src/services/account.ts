@@ -60,4 +60,37 @@ export default {
       throw error;
     }
   },
+
+  async deposit(accountId: string, amount: number) {
+    try {
+      logger.info({
+        message: "Starting to process deposit...",
+      });
+
+      const contract = await hyperledgerFabric.getContract();
+
+      const accountAsBuffer = await contract.submitTransaction(
+        "depositToAccount",
+        accountId,
+        amount.toString()
+      );
+
+      const createdAccount = parser.bufferToJSON(accountAsBuffer);
+
+      logger.info({
+        message: "Successfully made deposit to account",
+      });
+
+      return createdAccount;
+    } catch (error) {
+      logger.error({
+        message: "Failed to process deposit on blockchain",
+        error_message: error.message,
+        error_stack: error.stack,
+      });
+
+      throw error;
+    }
+  },
+
 };

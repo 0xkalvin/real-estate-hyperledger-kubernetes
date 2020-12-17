@@ -9,6 +9,6 @@ application.use(express.json())
 application.get('/_health_check', (_, response) => response.sendStatus(200))
 application.post('/accounts', accountController.create)
 application.get('/accounts/:id', accountController.show)
-
+application.post('/accounts/:id/deposits', accountController.makeDeposit)
 
 export default application
