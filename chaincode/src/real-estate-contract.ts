@@ -214,19 +214,32 @@ export class RealEstateContract extends Contract {
     }
 
     @Transaction()
-    public async transferRealEstateOwnership(ctx: Context, offerKey: string): Promise<Offer> {
+    public async transferRealEstateOwnership(ctx: Context, realEstateKey: string, offerKey: string): Promise<RealEstate> {
         try {
 
-            const offer = await this.getAssetById(ctx, offerKey) as Offer
+            const queriesResults = await Promise.all([
+                this.getAssetById(ctx, offerKey),
+                this.getAssetById(ctx, realEstateKey)
+            ]) 
+
+            const offer = queriesResults[0] as Offer
+            const realEstate = queriesResults[1] as RealEstate
+
+            if(!offer.buyerSignature || !offer.sellerSignature){
+                throw new Error("Both parties need to sign offer before transfering real estate ownership")
+            }
+
+            if(realEstateKey !== offer.realEstateId){
+                throw new Error("Offer does not match specified real estate")
+            }
 
             const accounts = await Promise.all([
                 this.getAssetById(ctx, offer.buyerAccountId),
-                this.getAssetById(ctx, offer.sellerAccountId)
+                this.getAssetById(ctx, offer.sellerAccountId),
             ])
 
             const buyerAccount = accounts[0] as Account
             const sellerAccount = accounts[1] as Account
-
 
             if(offer.amount > buyerAccount.balance){
                 logger.error({
@@ -240,7 +253,10 @@ export class RealEstateContract extends Contract {
 
             sellerAccount.balance = Number(sellerAccount.balance) + Number(offer.amount)
             buyerAccount.balance = Number(buyerAccount.balance) - Number(offer.amount)        
+            
             offer.status = 'COMPLETED'
+
+            realEstate.ownerAccountId = buyerAccount.id
 
             const sellerAccountAsBuffer = Buffer.from(JSON.stringify(sellerAccount));
             await ctx.stub.putState(sellerAccount.id, sellerAccountAsBuffer);
@@ -251,7 +267,10 @@ export class RealEstateContract extends Contract {
             const offerAsBuffer = Buffer.from(JSON.stringify(offer));
             await ctx.stub.putState(offer.id, offerAsBuffer);
 
-            return offer
+            const realEstateAsBuffer = Buffer.from(JSON.stringify(realEstate));
+            await ctx.stub.putState(realEstate.id, realEstateAsBuffer);
+
+            return realEstate
         } catch (error) {
             logger.error({
                 message: 'Failed to add seller signature',
