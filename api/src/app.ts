@@ -2,6 +2,7 @@ import express, { Application } from 'express'
 
 import accountController from './controllers/account'
 import realEstateController from './controllers/real-estate'
+import offerController from './controllers/offer'
 
 const application: Application = express()
 
@@ -13,5 +14,8 @@ application.get('/accounts/:id', accountController.show)
 application.post('/accounts/:id/deposits', accountController.makeDeposit)
 application.post('/real_estate', realEstateController.create)
 application.get('/real_estate/:id', realEstateController.show)
+application.post('/offers', offerController.create)
+application.get('/offers/:id', offerController.show)
+application.post('/offers/:id/signatures', offerController.addSignature)
 
 export default application
