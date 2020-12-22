@@ -2,7 +2,7 @@
     "certificateAuthorities": {
         "Org1CA": {
             "caName": "ca",
-            "url": "http://localhost:17050"
+            "url": "http://localhost:7054"
         }
     },
     "client": {
@@ -30,7 +30,7 @@
     },
     "peers": {
         "Org1Peer1": {
-            "url": "grpc://localhost:17051"
+            "url": "grpc://localhost:7051"
         }
     },
     "version": "1.0.0"
