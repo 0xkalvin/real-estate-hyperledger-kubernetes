@@ -16,14 +16,14 @@ import * as connectionProfile from "../config/connection-profile.json";
 
 /*  Loads env variables */
 const {
-  CA_URL = "http://localhost:17050",
+  CA_URL = "http://localhost:7054",
   WALLET_USER_IDENTITY = "admin",
   WALLET_PASSWORD_IDENTITY = "adminpw",
   MSPID = 'Org1MSP',
   DISCOVERY = "true",
   ISLOCAL = "true",
   CHANNEL_NAME = "mychannel",
-  CHAINCODE_NAME = "realestate",
+  CHAINCODE_NAME = "mycc",
   SMART_CONTRACT_NAME = "RealEstateContract",
 } = process.env;
 
@@ -120,8 +120,6 @@ export default class HyperledgerFabric {
       });
 
       await this.wallet.put(WALLET_USER_IDENTITY, identity);
-
-      console.log("Identity created successfully");
 
       logger.info({
         message: 'Identity saved into wallet!'
