@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fabric-tools
+spec:
+  volumes:
+  - name: fabricfiles
+    persistentVolumeClaim:
+      claimName: fabric-pvc
+  - name: dockersocket
+    hostPath:
+      path: /var/run/docker.sock
+  containers:
+    - name: fabrictools
+      image: hyperledger/fabric-tools:1.4.6
+      imagePullPolicy: Always
+      command: ["sh", "-c", "sleep 48h"]
+      env:
+      - name: TZ
+        value: "America/Sao_Paulo"
+      - name: CHANNEL_NAME
+        value: mychannel
+      - name: ORDERER_URL
+        value: fabric-orderer:7050
+      - name: CORE_PEER_LOCALMSPID
+        value: Org1MSP
+      - name: CORE_PEER_MSPCONFIGPATH
+        value: /fabric/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/
+      volumeMounts:
+        - mountPath: /fabric
+          name: fabricfiles
+        - mountPath: /host/var/run/docker.sock
+          name: dockersocket

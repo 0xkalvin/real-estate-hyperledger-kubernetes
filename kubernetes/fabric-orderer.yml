@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fabric-orderer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fabric-orderer
+  template:
+    metadata:
+      labels:
+        app: fabric-orderer
+    spec:
+      volumes:
+      - name: fabricfiles
+        persistentVolumeClaim:
+          claimName: fabric-pvc
+
+      containers:
+      - name: fabric-orderer
+        image: hyperledger/fabric-orderer:1.4.6
+        command: ["sh", "-c", "orderer"]
+        env:
+        - name: TZ
+          value: "America/Sao_Paulo"
+        - name: ORDERER_GENERAL_LISTENADDRESS
+          value: 0.0.0.0
+        - name: ORDERER_GENERAL_LOGLEVEL
+          value: debug
+        - name: ORDERER_GENERAL_LOCALMSPDIR
+          value: /fabric/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp
+        - name: ORDERER_GENERAL_LOCALMSPID
+          value: OrdererMSP
+        - name: ORDERER_GENERAL_GENESISMETHOD
+          value: file
+        - name: ORDERER_GENERAL_GENESISFILE
+          value: /fabric/config/genesis.block
+        - name: ORDERER_GENERAL_TLS_ENABLED
+          value: "false"
+        - name: GODEBUG
+          value: "netdns=go"
+        volumeMounts:
+        - mountPath: /fabric
+          name: fabricfiles
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: fabric-orderer
+  labels:
+    run: fabric-orderer
+spec:
+  type: ClusterIP
+  selector:
+    name: fabric-orderer
+  ports:
+  - protocol: TCP
+    port: 7050
+    name: grpc
