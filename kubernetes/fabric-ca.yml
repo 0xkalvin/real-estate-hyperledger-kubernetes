@@ -13,35 +13,36 @@ spec:
         app: fabric-ca
     spec:
       volumes:
-      - name: fabricfiles
-        persistentVolumeClaim:
-          claimName: fabric-pvc
+        - name: fabricfiles
+          persistentVolumeClaim:
+            claimName: fabric-pvc
 
       containers:
-      - name: fabric-ca
-        image: hyperledger/fabric-ca:1.4.6
-        command: ["sh", "-c", "fabric-ca-server start -b admin:adminpw -d"]
-        env:
-        - name: TZ
-          value: "America/Sao_Paulo"
-        - name: FABRIC_CA_HOME
-          value: /etc/hyperledger/fabric-ca-server
-        - name: FABRIC_CA_SERVER_CA_NAME
-          value: ca.example.com
-        - name: FABRIC_CA_SERVER_CA_KEYFILE
-          value: /fabric/crypto-config/peerOrganizations/org1.example.com/ca/4239aa0dcd76daeeb8ba0cda701851d14504d31aad1b2ddddbac6a57365e497c_sk
-        - name: FABRIC_CA_SERVER_DEBUG
-          value: "true"
-        - name: FABRIC_CA_SERVER_CA_CERTFILE
-          value: /fabric/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
-        - name: GODEBUG
-          value: "netdns=go"
-        volumeMounts:
-        - mountPath: /fabric
-          name: fabricfiles
+        - name: fabric-ca
+          image: hyperledger/fabric-ca:1.4.6
+          ports:
+            - containerPort: 7054
+          command: ["sh", "-c", "fabric-ca-server start -b admin:adminpw -d"]
+          env:
+            - name: TZ
+              value: "America/Sao_Paulo"
+            - name: FABRIC_CA_HOME
+              value: /etc/hyperledger/fabric-ca-server
+            - name: FABRIC_CA_SERVER_CA_NAME
+              value: ca.example.com
+            - name: FABRIC_CA_SERVER_CA_KEYFILE
+              value: /fabric/crypto-config/peerOrganizations/org1.example.com/ca/4239aa0dcd76daeeb8ba0cda701851d14504d31aad1b2ddddbac6a57365e497c_sk
+            - name: FABRIC_CA_SERVER_DEBUG
+              value: "true"
+            - name: FABRIC_CA_SERVER_CA_CERTFILE
+              value: /fabric/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
+            - name: GODEBUG
+              value: "netdns=go"
+          volumeMounts:
+            - mountPath: /fabric
+              name: fabricfiles
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -49,14 +50,10 @@ metadata:
   labels:
     run: fabric-ca
 spec:
-  type: ClusterIP
   selector:
-    name: fabric-ca
+    app: fabric-ca
   ports:
-  - protocol: TCP
-    port: 30054
-    targetPort: 7054
-    name: grpc
-  - protocol: TCP
-    port: 7054
-    name: grpc1
+    - protocol: TCP
+      port: 7054
+      targetPort: 7054
+  type: LoadBalancer
