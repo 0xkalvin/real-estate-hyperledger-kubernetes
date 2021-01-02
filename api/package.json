@@ -6,9 +6,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "nodemon",
-    "prebuild": "rm -rf dist",
     "postbuild": "cp ./src/config/*.json dist/config ",
-    "prestart": "npm run build",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
