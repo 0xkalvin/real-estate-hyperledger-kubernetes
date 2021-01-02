@@ -13,65 +13,74 @@ spec:
         app: fabric-peer
     spec:
       volumes:
-      - name: fabricfiles
-        persistentVolumeClaim:
-          claimName: fabric-pvc
-      - name: dockersocket
-        hostPath:
-          path: /var/run/docker.sock
+        - name: fabricfiles
+          persistentVolumeClaim:
+            claimName: fabric-pvc
+        - name: dockersocket
+          hostPath:
+            path: /var/run/docker.sock
 
       containers:
-      - name: peer
-        image: hyperledger/fabric-peer:1.4.6
-        command: ["sh", "-c", "peer node start"]
-        env:
-        - name: TZ
-          value: "America/Sao_Paulo"
-        - name: CORE_VM_ENDPOINT
-          value: unix:///host/var/run/docker.sock
-        - name: CORE_PEER_ID
-          value: fabric-peer
-        - name: CORE_LOGGING_PEER
-          value: debug
-        - name: CORE_CHAINCODE_LOGGING_LEVEL
-          value: DEBUG
-        - name: CORE_PEER_LOCALMSPID
-          value: Org1MSP
-        - name: CORE_PEER_MSPCONFIGPATH
-          value: /fabric/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/
-        - name: CORE_PEER_ADDRESS
-          value: 0.0.0.0:7051
-        - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
-          value: 0.0.0.0:7051
-        - name: CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE
-          value: ${COMPOSE_PROJECT_NAME}_basic
-        - name: CORE_LEDGER_STATE_STATEDATABASE
-          value: "CouchDB"
-        - name: CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
-          value: "localhost:5984"
-        - name: CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME
-          value: "admin"
-        - name: CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD
-          value: "adminpw"
-        - name: CORE_CHAINCODE_BUILDER
-          value: hyperledger/fabric-ccenv:1.4.0
-        volumeMounts:
-        - mountPath: /fabric
-          name: fabricfiles
-        - mountPath: /host/var/run/docker.sock
-          name: dockersocket
-      - name: couchdb
-        image: hyperledger/fabric-couchdb:0.4.15
-        env:
-        - name: TZ
-          value: "America/Sao_Paulo"
-        - name: COUCHDB_USER
-          value: "admin"
-        - name: COUCHDB_PASSWORD
-          value: "adminpw"
+        - name: peer
+          image: hyperledger/fabric-peer:1.4.6
+          ports:
+            - containerPort: 7051
+          command: ["sh", "-c", "peer node start"]
+          env:
+            - name: TZ
+              value: "America/Sao_Paulo"
+            - name: CORE_VM_ENDPOINT
+              value: unix:///host/var/run/docker.sock
+            - name: CORE_PEER_ID
+              value: fabric-peer
+            - name: CORE_LOGGING_PEER
+              value: debug
+            - name: CORE_CHAINCODE_LOGGING_LEVEL
+              value: DEBUG
+            - name: CORE_PEER_LOCALMSPID
+              value: Org1MSP
+            - name: CORE_PEER_MSPCONFIGPATH
+              value: /fabric/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/
+            - name: CORE_PEER_ADDRESS
+              value: 0.0.0.0:7051
+            - name: CORE_PEER_GOSSIP_EXTERNALENDPOINT
+              value: 0.0.0.0:7051
+            - name: CORE_LEDGER_STATE_STATEDATABASE
+              value: "CouchDB"
+            - name: CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS
+              value: "localhost:5984"
+            - name: CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME
+              value: "admin"
+            - name: CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD
+              value: "adminpw"
+            - name: CORE_CHAINCODE_BUILDER
+              value: hyperledger/fabric-ccenv:1.4.0
+            - name: ORDERER_URL
+              value: fabric-orderer:7050
+            - name: GODEBUG
+              value: "netdns=go"
+            - name: CORE_VM_DOCKER_ATTACHSTDOUT
+              value: "true"
+            - name: FABRIC_LOGGING_SPEC
+              value: grpc=debug:info
+          volumeMounts:
+            - mountPath: /fabric
+              name: fabricfiles
+            - mountPath: /host/var/run/docker.sock
+              name: dockersocket
+        - name: couchdb
+          image: hyperledger/fabric-couchdb:0.4.15
+          ports:
+            - containerPort: 5984
+          env:
+            - name: TZ
+              value: "America/Sao_Paulo"
+            - name: COUCHDB_USER
+              value: "admin"
+            - name: COUCHDB_PASSWORD
+              value: "adminpw"
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -79,16 +88,19 @@ metadata:
   labels:
     run: fabric-peer
 spec:
-  type: ClusterIP 
   selector:
-    name: fabric-peer
+    app: fabric-peer
   ports:
-  - protocol: TCP
-    port: 7051
-    name: grpc
-  - protocol: TCP
-    port: 7053
-    name: events
-  - protocol: TCP
-    port: 5984
-    name: couchdb
+    - protocol: TCP
+      port: 7051
+      targetPort: 7051
+      name: grpc
+    - protocol: TCP
+      port: 7053
+      targetPort: 7053
+      name: events
+    - protocol: TCP
+      port: 5984
+      targetPort: 5984
+      name: couchdb
+  type: LoadBalancer

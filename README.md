@@ -31,6 +31,30 @@ Also, copy the chaincode source files to the volume
 kubectl cp ./chaincode/ fabric-tools:/fabric/
 ```
 
+Lastly, copy the configtx file which has the network topology configuration
+
+```bash
+kubectl cp ./network/peer/configtx.yaml fabric-tools:/fabric/configtx.yaml
+```
+
+Now, let's access the fabric helper pod to generate the blockchain genesis block
+
+```bash
+kubectl exec -it fabric-tools -- /bin/bash
+
+cd /fabric
+
+configtxgen -profile OneOrgOrdererGenesis -outputBlock /fabric/config/genesis.block -channelID test -configPath .
+
+configtxgen inspect /fabric/config/genesis.block
+
+configtxgen -profile OneOrgChannel -outputCreateChannelTx ./config/channel.tx -channelID mychannel -configPath .
+
+configtxgen -profile OneOrgChannel -outputAnchorPeersUpdate ./config/Org1MSPanchors.tx -channelID mychannel -asOrg Org1MSP  -configPath .
+
+exit
+```
+
 Create a fabric certificate authority
 
 ```bash
@@ -98,6 +122,12 @@ Update the anchor peer to reflect on the discovery services
 peer channel update -o ${ORDERER_URL} -c mychannel -f /fabric/config/Org1MSPanchors.tx
 ```
 
+Now that the entire Hyperledger Fabric blockchain network is up and kunning inside the kubernetes cluster, start up the API service
+
+```bash
+kubectl apply -f ./kubernetes/api.yml
+```
+
 
 #### Using docker-compose
 
@@ -160,5 +190,3 @@ Update the anchor peer to reflect on the discovery services
 ```bash
 peer channel update -o orderer.example.com:7050 -c mychannel -f /opt/gopath/src/github.com/hyperledger/fabric/config/Org1MSPanchors.tx
 ```
-
-#### Kubernetes

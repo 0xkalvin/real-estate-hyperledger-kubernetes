@@ -13,39 +13,46 @@ spec:
         app: fabric-orderer
     spec:
       volumes:
-      - name: fabricfiles
-        persistentVolumeClaim:
-          claimName: fabric-pvc
+        - name: fabricfiles
+          persistentVolumeClaim:
+            claimName: fabric-pvc
 
       containers:
-      - name: fabric-orderer
-        image: hyperledger/fabric-orderer:1.4.6
-        command: ["sh", "-c", "orderer"]
-        env:
-        - name: TZ
-          value: "America/Sao_Paulo"
-        - name: ORDERER_GENERAL_LISTENADDRESS
-          value: 0.0.0.0
-        - name: ORDERER_GENERAL_LOGLEVEL
-          value: debug
-        - name: ORDERER_GENERAL_LOCALMSPDIR
-          value: /fabric/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp
-        - name: ORDERER_GENERAL_LOCALMSPID
-          value: OrdererMSP
-        - name: ORDERER_GENERAL_GENESISMETHOD
-          value: file
-        - name: ORDERER_GENERAL_GENESISFILE
-          value: /fabric/config/genesis.block
-        - name: ORDERER_GENERAL_TLS_ENABLED
-          value: "false"
-        - name: GODEBUG
-          value: "netdns=go"
-        volumeMounts:
-        - mountPath: /fabric
-          name: fabricfiles
+        - name: fabric-orderer
+          image: hyperledger/fabric-orderer:1.4.6
+          ports:
+            - containerPort: 7050
+          command: ["sh", "-c", "orderer"]
+          env:
+            - name: TZ
+              value: "America/Sao_Paulo"
+            - name: CONFIGTX_ORDERER_ADDRESSES
+              value: "fabric-orderer:7050"
+            - name: ORDERER_GENERAL_LISTENADDRESS
+              value: 0.0.0.0
+            - name: ORDERER_GENERAL_LISTENPORT
+              value: "7050"
+            - name: ORDERER_GENERAL_LOGLEVEL
+              value: debug
+            - name: ORDERER_GENERAL_LOCALMSPDIR
+              value: /fabric/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp
+            - name: ORDERER_GENERAL_LOCALMSPID
+              value: OrdererMSP
+            - name: ORDERER_GENERAL_GENESISMETHOD
+              value: file
+            - name: ORDERER_GENERAL_GENESISFILE
+              value: /fabric/config/genesis.block
+            - name: ORDERER_GENERAL_TLS_ENABLED
+              value: "false"
+            - name: GODEBUG
+              value: "netdns=go"
+            - name: FABRIC_LOGGING_SPEC
+              value: grpc=debug:info
+          volumeMounts:
+            - mountPath: /fabric
+              name: fabricfiles
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -53,10 +60,10 @@ metadata:
   labels:
     run: fabric-orderer
 spec:
-  type: ClusterIP
   selector:
-    name: fabric-orderer
+    app: fabric-orderer
   ports:
-  - protocol: TCP
-    port: 7050
-    name: grpc
+    - protocol: TCP
+      port: 7050
+      targetPort: 7050
+  type: LoadBalancer

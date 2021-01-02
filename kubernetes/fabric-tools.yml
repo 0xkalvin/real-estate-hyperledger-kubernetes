@@ -20,12 +20,18 @@ spec:
         value: "America/Sao_Paulo"
       - name: CHANNEL_NAME
         value: mychannel
-      - name: ORDERER_URL
-        value: fabric-orderer:7050
       - name: CORE_PEER_LOCALMSPID
         value: Org1MSP
+      - name: CORE_PEER_ID
+        value: cli
       - name: CORE_PEER_MSPCONFIGPATH
-        value: /fabric/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/
+        value: /fabric/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+      - name: CORE_PEER_ADDRESS
+        value: fabric-peer:7051
+      - name: ORDERER_URL
+        value: fabric-orderer:7050
+      - name: FABRIC_LOGGING_SPEC
+        value: grpc=debug:info
       volumeMounts:
         - mountPath: /fabric
           name: fabricfiles
