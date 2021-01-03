@@ -31,8 +31,22 @@ spec:
           env:
             - name: PORT
               value: "3000"
-            - name: CA_URL
-              value: http://fabric-ca:7054
+            - name: WALLET_USER_IDENTITY
+              value: admin
+            - name: WALLET_PASSWORD_IDENTITY
+              value: adminpw
+            - name: MSPID
+              value: Org1MSP
+            - name: DISCOVERY
+              value: "true"
+            - name: ISLOCAL
+              value: "false"
+            - name: CHANNEL_NAME
+              value: mychannel
+            - name: CHAINCODE_NAME
+              value: mycc
+            - name: SMART_CONTRACT_NAME
+              value: RealEstateContract
           ports:
           - name: http
             containerPort: 3000
