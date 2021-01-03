@@ -41,7 +41,7 @@ Organizations:
             # AnchorPeers defines the location of peers which can be used
             # for cross org gossip communication.  Note, this value is only
             # encoded in the genesis block in the Application section context
-            - Host: 127.0.0.1
+            - Host: fabric-peer
               Port: 7051
 
 ################################################################################
