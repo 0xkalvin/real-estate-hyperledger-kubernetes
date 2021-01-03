@@ -16,12 +16,11 @@ import * as connectionProfile from "../config/connection-profile.json";
 
 /*  Loads env variables */
 const {
-  CA_URL = "http://localhost:7054",
   WALLET_USER_IDENTITY = "admin",
   WALLET_PASSWORD_IDENTITY = "adminpw",
   MSPID = 'Org1MSP',
   DISCOVERY = "true",
-  ISLOCAL = "true",
+  ISLOCAL = "false",
   CHANNEL_NAME = "mychannel",
   CHAINCODE_NAME = "mycc",
   SMART_CONTRACT_NAME = "RealEstateContract",
@@ -87,7 +86,9 @@ export default class HyperledgerFabric {
         return;
       }
 
-      const ca = new FabricCAServices(CA_URL);
+      const caURL = connectionProfile.certificateAuthorities.Org1CA.url
+
+      const ca = new FabricCAServices(caURL);
 
       logger.info({
         message: 'Enrolling identity..'
